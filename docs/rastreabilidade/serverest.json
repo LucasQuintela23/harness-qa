@@ -1,0 +1,489 @@
+{
+  "requisitos": [
+    {
+      "id": "REQ-SR-001",
+      "titulo": "POST /login retorna 200 e token para credencial valida; 401 para credencial invalida; 400 para entrada malformada",
+      "risco": "R-SR-01"
+    },
+    {
+      "id": "REQ-SR-002",
+      "titulo": "POST /usuarios cria usuario (201); rejeita e-mail duplicado e dados invalidos (400)",
+      "risco": "R-SR-03"
+    },
+    {
+      "id": "REQ-SR-003",
+      "titulo": "Rotas de escrita de /produtos exigem token valido (401) e perfil administrador (403)",
+      "risco": "R-SR-02"
+    },
+    {
+      "id": "REQ-SR-004",
+      "titulo": "POST /produtos valida preco (inteiro positivo), quantidade (inteiro >= 0), campos obrigatorios e nome unico",
+      "risco": "R-SR-04"
+    },
+    {
+      "id": "REQ-SR-005",
+      "titulo": "Produto em carrinho e usuario com carrinho nao podem ser excluidos (400)",
+      "risco": "R-SR-07"
+    },
+    {
+      "id": "REQ-SR-006",
+      "titulo": "POST /carrinhos exige token, produto existente, sem duplicidade, quantidade positiva ate o estoque",
+      "risco": "R-SR-05"
+    },
+    {
+      "id": "REQ-SR-007",
+      "titulo": "Ciclo do carrinho: um por usuario; concluir e cancelar removem o carrinho; cancelar repoe o estoque",
+      "risco": "R-SR-06"
+    },
+    {
+      "id": "REQ-SR-008",
+      "titulo": "Respostas de leitura e de erro tem formato estavel (campos e tipos)",
+      "risco": "R-SR-08"
+    }
+  ],
+  "riscos": [
+    {
+      "id": "R-SR-01",
+      "descricao": "Login aceita credencial invalida ou nega valida",
+      "probabilidade": 2,
+      "impacto": 5,
+      "nivel": "medio"
+    },
+    {
+      "id": "R-SR-02",
+      "descricao": "Rota de admin acessivel sem token ou por nao admin",
+      "probabilidade": 3,
+      "impacto": 5,
+      "nivel": "alto"
+    },
+    {
+      "id": "R-SR-03",
+      "descricao": "Cadastro de usuario aceita dado invalido ou e-mail duplicado",
+      "probabilidade": 3,
+      "impacto": 4,
+      "nivel": "alto"
+    },
+    {
+      "id": "R-SR-04",
+      "descricao": "Produto com preco/quantidade invalidos ou nome duplicado",
+      "probabilidade": 3,
+      "impacto": 3,
+      "nivel": "medio"
+    },
+    {
+      "id": "R-SR-05",
+      "descricao": "Carrinho aceita quantidade acima do estoque, produto duplicado ou 2o carrinho",
+      "probabilidade": 4,
+      "impacto": 5,
+      "nivel": "critico"
+    },
+    {
+      "id": "R-SR-06",
+      "descricao": "Estoque/carrinho inconsistentes apos concluir ou cancelar compra",
+      "probabilidade": 3,
+      "impacto": 5,
+      "nivel": "alto"
+    },
+    {
+      "id": "R-SR-07",
+      "descricao": "Integridade referencial: excluir produto/usuario com carrinho",
+      "probabilidade": 3,
+      "impacto": 4,
+      "nivel": "alto"
+    },
+    {
+      "id": "R-SR-08",
+      "descricao": "Formato de resposta muda e quebra consumidores",
+      "probabilidade": 2,
+      "impacto": 3,
+      "nivel": "medio"
+    }
+  ],
+  "itensDeCobertura": [
+    {
+      "id": "SR-LOG-DT-R1",
+      "requisito": "REQ-SR-001",
+      "tecnica": "DT",
+      "descricao": "email cadastrado + senha correta = 200 e token"
+    },
+    {
+      "id": "SR-LOG-DT-R2",
+      "requisito": "REQ-SR-001",
+      "tecnica": "DT",
+      "descricao": "email cadastrado + senha errada = 401"
+    },
+    {
+      "id": "SR-LOG-DT-R3",
+      "requisito": "REQ-SR-001",
+      "tecnica": "DT",
+      "descricao": "email nao cadastrado = 401"
+    },
+    {
+      "id": "SR-LOG-EP-I-EMAIL",
+      "requisito": "REQ-SR-001",
+      "tecnica": "EP",
+      "descricao": "particao invalida: email sem formato valido = 400"
+    },
+    {
+      "id": "SR-LOG-EP-I-SENHA",
+      "requisito": "REQ-SR-001",
+      "tecnica": "EP",
+      "descricao": "particao invalida: senha ausente = 400"
+    },
+    {
+      "id": "SR-USR-EP-V",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EP",
+      "descricao": "particao valida: todos os campos validos = 201"
+    },
+    {
+      "id": "SR-USR-EP-I-NOME",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EP",
+      "descricao": "particao invalida: nome vazio"
+    },
+    {
+      "id": "SR-USR-EP-I-EMAIL",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EP",
+      "descricao": "particao invalida: email sem formato valido"
+    },
+    {
+      "id": "SR-USR-EP-I-SENHA",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EP",
+      "descricao": "particao invalida: password vazio"
+    },
+    {
+      "id": "SR-USR-EP-I-ADM",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EP",
+      "descricao": "particao invalida: administrador fora de true/false"
+    },
+    {
+      "id": "SR-USR-DT-R1",
+      "requisito": "REQ-SR-002",
+      "tecnica": "DT",
+      "descricao": "email novo + administrador true = 201 admin"
+    },
+    {
+      "id": "SR-USR-DT-R2",
+      "requisito": "REQ-SR-002",
+      "tecnica": "DT",
+      "descricao": "email novo + administrador false = 201 comum"
+    },
+    {
+      "id": "SR-USR-DT-R3",
+      "requisito": "REQ-SR-002",
+      "tecnica": "DT",
+      "descricao": "email duplicado = 400"
+    },
+    {
+      "id": "SR-USR-EG-PUT-NOVO",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EG",
+      "descricao": "PUT com id inexistente cria usuario (201)"
+    },
+    {
+      "id": "SR-USR-EG-PUT-DUP",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EG",
+      "descricao": "PUT com email de outro usuario = 400"
+    },
+    {
+      "id": "SR-USR-EG-GET-INEX",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EG",
+      "descricao": "GET com id valido inexistente = 400"
+    },
+    {
+      "id": "SR-USR-EG-ID-MALFORMADO",
+      "requisito": "REQ-SR-002",
+      "tecnica": "EG",
+      "descricao": "GET com id fora do formato de 16 caracteres = 400"
+    },
+    {
+      "id": "SR-AUT-DT-POST-R1",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "criar produto: sem token = 401"
+    },
+    {
+      "id": "SR-AUT-DT-POST-R2",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "criar produto: token invalido = 401"
+    },
+    {
+      "id": "SR-AUT-DT-POST-R3",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "criar produto: usuario nao admin = 403"
+    },
+    {
+      "id": "SR-AUT-DT-POST-R4",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "criar produto: admin = sucesso"
+    },
+    {
+      "id": "SR-AUT-DT-PUT-R1",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "alterar produto: sem token = 401"
+    },
+    {
+      "id": "SR-AUT-DT-PUT-R3",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "alterar produto: usuario nao admin = 403"
+    },
+    {
+      "id": "SR-AUT-DT-PUT-R4",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "alterar produto: admin = sucesso"
+    },
+    {
+      "id": "SR-AUT-DT-DEL-R1",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "excluir produto: sem token = 401"
+    },
+    {
+      "id": "SR-AUT-DT-DEL-R3",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "excluir produto: usuario nao admin = 403"
+    },
+    {
+      "id": "SR-AUT-DT-DEL-R4",
+      "requisito": "REQ-SR-003",
+      "tecnica": "DT",
+      "descricao": "excluir produto: admin = sucesso"
+    },
+    {
+      "id": "SR-AUT-EG-EXP",
+      "requisito": "REQ-SR-003",
+      "tecnica": "EG",
+      "descricao": "token expirado (600 s) = 401; nao automatizado (custo de espera), coberto por charter",
+      "manual": true
+    },
+    {
+      "id": "SR-PRD-EP-V",
+      "requisito": "REQ-SR-004",
+      "tecnica": "EP",
+      "descricao": "particao valida: produto com todos os campos validos = 201"
+    },
+    {
+      "id": "SR-PRD-BV-P0",
+      "requisito": "REQ-SR-004",
+      "tecnica": "BVA2",
+      "descricao": "preco 0 (abaixo do minimo 1) = 400"
+    },
+    {
+      "id": "SR-PRD-BV-P1",
+      "requisito": "REQ-SR-004",
+      "tecnica": "BVA2",
+      "descricao": "preco 1 (minimo) = 201"
+    },
+    {
+      "id": "SR-PRD-BV-Q-1",
+      "requisito": "REQ-SR-004",
+      "tecnica": "BVA2",
+      "descricao": "quantidade -1 (abaixo do minimo 0) = 400"
+    },
+    {
+      "id": "SR-PRD-BV-Q0",
+      "requisito": "REQ-SR-004",
+      "tecnica": "BVA2",
+      "descricao": "quantidade 0 (minimo) = 201"
+    },
+    {
+      "id": "SR-PRD-EP-PRECO-DEC",
+      "requisito": "REQ-SR-004",
+      "tecnica": "EP",
+      "descricao": "particao invalida: preco decimal"
+    },
+    {
+      "id": "SR-PRD-EP-PRECO-TXT",
+      "requisito": "REQ-SR-004",
+      "tecnica": "EP",
+      "descricao": "particao invalida: preco texto"
+    },
+    {
+      "id": "SR-PRD-EP-NOME-VAZIO",
+      "requisito": "REQ-SR-004",
+      "tecnica": "EP",
+      "descricao": "particao invalida: nome vazio"
+    },
+    {
+      "id": "SR-PRD-EP-DESC-VAZIA",
+      "requisito": "REQ-SR-004",
+      "tecnica": "EP",
+      "descricao": "particao invalida: descricao vazia"
+    },
+    {
+      "id": "SR-PRD-EP-NOME-DUP",
+      "requisito": "REQ-SR-004",
+      "tecnica": "EP",
+      "descricao": "particao invalida: nome duplicado = 400"
+    },
+    {
+      "id": "SR-INT-DT-R1",
+      "requisito": "REQ-SR-005",
+      "tecnica": "DT",
+      "descricao": "produto em carrinho: exclusao = 400"
+    },
+    {
+      "id": "SR-INT-DT-R2",
+      "requisito": "REQ-SR-005",
+      "tecnica": "DT",
+      "descricao": "usuario com carrinho: exclusao = 400"
+    },
+    {
+      "id": "SR-INT-DT-R3",
+      "requisito": "REQ-SR-005",
+      "tecnica": "DT",
+      "descricao": "produto sem carrinho: exclusao = 200"
+    },
+    {
+      "id": "SR-INT-DT-R4",
+      "requisito": "REQ-SR-005",
+      "tecnica": "DT",
+      "descricao": "usuario sem carrinho: exclusao = 200"
+    },
+    {
+      "id": "SR-CAR-BV-0",
+      "requisito": "REQ-SR-006",
+      "tecnica": "BVA3",
+      "descricao": "quantidade 0 (abaixo do minimo 1) = 400"
+    },
+    {
+      "id": "SR-CAR-BV-1",
+      "requisito": "REQ-SR-006",
+      "tecnica": "BVA3",
+      "descricao": "quantidade 1 (minimo) = 201"
+    },
+    {
+      "id": "SR-CAR-BV-2",
+      "requisito": "REQ-SR-006",
+      "tecnica": "BVA3",
+      "descricao": "quantidade 2 (acima do minimo) = 201"
+    },
+    {
+      "id": "SR-CAR-BV-E4",
+      "requisito": "REQ-SR-006",
+      "tecnica": "BVA3",
+      "descricao": "quantidade 4 com estoque 5 (E-1) = 201"
+    },
+    {
+      "id": "SR-CAR-BV-E5",
+      "requisito": "REQ-SR-006",
+      "tecnica": "BVA3",
+      "descricao": "quantidade 5 com estoque 5 (E) = 201"
+    },
+    {
+      "id": "SR-CAR-BV-E6",
+      "requisito": "REQ-SR-006",
+      "tecnica": "BVA3",
+      "descricao": "quantidade 6 com estoque 5 (E+1) = 400"
+    },
+    {
+      "id": "SR-CAR-DT-R1",
+      "requisito": "REQ-SR-006",
+      "tecnica": "DT",
+      "descricao": "token valido + produtos existentes distintos = 201"
+    },
+    {
+      "id": "SR-CAR-DT-R2",
+      "requisito": "REQ-SR-006",
+      "tecnica": "DT",
+      "descricao": "sem token = 401"
+    },
+    {
+      "id": "SR-CAR-DT-R3",
+      "requisito": "REQ-SR-006",
+      "tecnica": "DT",
+      "descricao": "produto inexistente = 400"
+    },
+    {
+      "id": "SR-CAR-DT-R4",
+      "requisito": "REQ-SR-006",
+      "tecnica": "DT",
+      "descricao": "produto duplicado no corpo = 400"
+    },
+    {
+      "id": "SR-CAR-ST-T1",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "transicao valida SEM_CARRINHO -criar-> COM_CARRINHO"
+    },
+    {
+      "id": "SR-CAR-ST-T2",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "transicao valida COM_CARRINHO -concluir-> SEM_CARRINHO"
+    },
+    {
+      "id": "SR-CAR-ST-T3",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "transicao valida COM_CARRINHO -cancelar-> SEM_CARRINHO"
+    },
+    {
+      "id": "SR-CAR-ST-X1",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "transicao invalida COM_CARRINHO -criar-> rejeitada (400); cobre a regra 'mais de 1 carrinho'"
+    },
+    {
+      "id": "SR-CAR-ST-X2",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "transicao invalida SEM_CARRINHO -concluir-> sem efeito"
+    },
+    {
+      "id": "SR-CAR-ST-X3",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "transicao invalida SEM_CARRINHO -cancelar-> sem efeito"
+    },
+    {
+      "id": "SR-CAR-ST-E1",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "concluir mantem o estoque reduzido"
+    },
+    {
+      "id": "SR-CAR-ST-E2",
+      "requisito": "REQ-SR-007",
+      "tecnica": "ST",
+      "descricao": "cancelar repoe o estoque"
+    },
+    {
+      "id": "SR-CTR-CHK-USR",
+      "requisito": "REQ-SR-008",
+      "tecnica": "CHK",
+      "descricao": "formato de GET /usuarios/{id}"
+    },
+    {
+      "id": "SR-CTR-CHK-PRD",
+      "requisito": "REQ-SR-008",
+      "tecnica": "CHK",
+      "descricao": "formato de GET /produtos/{id}"
+    },
+    {
+      "id": "SR-CTR-CHK-CAR",
+      "requisito": "REQ-SR-008",
+      "tecnica": "CHK",
+      "descricao": "formato de GET /carrinhos/{id}"
+    },
+    {
+      "id": "SR-CTR-CHK-ERR",
+      "requisito": "REQ-SR-008",
+      "tecnica": "CHK",
+      "descricao": "formato de resposta de erro (message)"
+    }
+  ]
+}
