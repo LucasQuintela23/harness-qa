@@ -1,5 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 
+try { process.loadEnvFile(); } catch { /* sem .env: variaveis vem do ambiente */ }
+
 const emCI = Boolean(process.env['CI']);
 
 export default defineConfig({

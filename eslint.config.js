@@ -31,6 +31,8 @@ export default tseslint.config(
       'playwright/no-useless-not': 'error',
       'playwright/prefer-strict-equal': 'error',
       'playwright/valid-title': 'error',
+      // Tags montadas por helper/dados (testes orientados a dados): validadas em execucao pelo sensor `rastreabilidade`, que le as tags de `playwright test --list`.
+      'playwright/valid-test-tags': 'off',
       'playwright/no-hooks': 'off',
     },
   },
