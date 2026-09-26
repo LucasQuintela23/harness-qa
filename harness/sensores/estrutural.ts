@@ -6,6 +6,8 @@ import type { Violacao } from './lib/relatorio.js';
 const SENSOR = 'estrutural';
 const DRIVERS = new Set(['chromium', 'firefox', 'webkit', 'request', '_electron', '_android']);
 const SEGREDO = /(password|senha|token|secret|apikey|api_key)/i;
+/** Literal parece segredo: sem espacos (mensagens tem) e com 6+ caracteres (evita falso positivo em 'x'). */
+const pareceSegredo = (texto: string): boolean => texto.length >= 6 && !/\s/.test(texto);
 
 interface Regra { id: string; onde: string; sufixo?: string; verificar: (sf: ts.SourceFile, arquivo: string) => Violacao[] }
 
@@ -54,8 +56,8 @@ const REGRAS: Regra[] = [
   { id: 'E8', onde: '.', verificar: (sf, a) => {
     const r: Violacao[] = [];
     percorrer(sf, (n) => {
-      if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && SEGREDO.test(n.name.text) && n.initializer && ts.isStringLiteralLike(n.initializer) && n.initializer.text.length > 0) r.push(v(a, sf, n, `E8 possivel segredo em literal (${n.name.text}).`, 'Segredos vem de variavel de ambiente via ProvedorDeAmbiente; use .env local e secrets do CI.'));
-      if (ts.isPropertyAssignment(n) && SEGREDO.test(n.name.getText(sf)) && ts.isStringLiteralLike(n.initializer) && n.initializer.text.length > 0) r.push(v(a, sf, n, `E8 possivel segredo em literal (${n.name.getText(sf)}).`, 'Segredos vem de variavel de ambiente via ProvedorDeAmbiente; use .env local e secrets do CI.'));
+      if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && SEGREDO.test(n.name.text) && n.initializer && ts.isStringLiteralLike(n.initializer) && pareceSegredo(n.initializer.text)) r.push(v(a, sf, n, `E8 possivel segredo em literal (${n.name.text}).`, 'Segredos vem de variavel de ambiente via ProvedorDeAmbiente; use .env local e secrets do CI.'));
+      if (ts.isPropertyAssignment(n) && SEGREDO.test(n.name.getText(sf)) && ts.isStringLiteralLike(n.initializer) && pareceSegredo(n.initializer.text)) r.push(v(a, sf, n, `E8 possivel segredo em literal (${n.name.getText(sf)}).`, 'Segredos vem de variavel de ambiente via ProvedorDeAmbiente; use .env local e secrets do CI.'));
     });
     return r;
   } },
