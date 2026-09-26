@@ -43,8 +43,8 @@ Técnica fora do syllabus só entra em `harness/config/politica.json` marcada co
 ## Comandos
 `npm run verificar` (rápido) · `npm run cobertura` (comandos/ramos: critério de saída de componente, não meta) · `npm run mutacao` · `npm run matriz` · `npm run sensores:{estaticos,relatorio,drift}`.
 
-## Commits (iuricode/padroes-de-commits)
-`<emoji> <tipo>: <descrição, máx. 4 palavras>` — feat :sparkles:, fix :bug:, docs :books:, test :test_tube:, build :construction_worker:, perf :zap:, style :art:, refactor :recycle:, chore :wrench:, ci :bricks:, raw :card_file_box:, cleanup :broom:, remove :wastebasket:. Ex.: `:test_tube: test: Cenários de login`. O hook `commit-msg` bloqueia o restante.
+## Commits (Conventional Commits, sem emoji)
+`<tipo>: <descrição, máx. 4 palavras>`. Tipos: feat, fix, docs, test, build, perf, style, refactor, chore, ci, raw, cleanup, remove. Ex.: `test: Cenários de login`. O hook `commit-msg` bloqueia mensagens com emoji ou `:código:` e qualquer formato fora disso. Sem linha `Co-Authored-By`. Commit e push só quando o usuário pedir.
 
 ## Skills (`harness/guias/skills`, também em `.claude/skills`)
 `/derivar-casos-de-teste` · `/revisar-teste` · `/revisar-plano-de-teste` · `/auditar-cobertura-de-risco` · `/conduzir-sessao-exploratoria`.
