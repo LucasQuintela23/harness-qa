@@ -19,7 +19,7 @@ export function listarTestes(): TesteListado[] {
   const visitar = (s: SuiteJson): void => {
     for (const e of s.specs ?? []) {
       const projeto = e.tests?.[0]?.projectName ?? '';
-      testes.push({ id: `${e.file}:${e.line}`, arquivo: `tests/${e.file}`.replace('tests/tests/', 'tests/'), linha: e.line, titulo: e.title, tags: (e.tags ?? []).map(comArroba), projeto });
+      testes.push({ id: `${e.file}:${e.line}`, arquivo: `sistemas/${e.file}`, linha: e.line, titulo: e.title, tags: (e.tags ?? []).map(comArroba), projeto });
     }
     (s.suites ?? []).forEach(visitar);
   };
@@ -50,11 +50,11 @@ export function analisar(testes: TesteListado[], dados: DadosDeRastreabilidade, 
     if (tecnicas.length !== 1) v.push({ ...base, problema: `teste "${t.titulo}" declara ${tecnicas.length} tecnicas (esperado exatamente 1).`, comoCorrigir: `Adicione uma unica tag @tecnica:<codigo> em { tag: [...] }. Codigos: ${tecnicasPermitidas.join(', ')}. Ex.: ${exemplo}` });
     else if (!tecnicasPermitidas.includes(tecnicas[0] ?? '')) v.push({ ...base, problema: `tecnica "${tecnicas[0]}" nao consta em harness/config/politica.json.`, comoCorrigir: `Use um dos codigos CTFL: ${tecnicasPermitidas.join(', ')}. Tecnica fora do syllabus deve ser registrada como extensao na politica.` });
 
-    if (reqIds.length === 0) v.push({ ...base, problema: `teste "${t.titulo}" sem @req.`, comoCorrigir: `Adicione @req:<ID> apontando para um requisito em docs/rastreabilidade/*.json. ${exemplo}` });
-    for (const id of reqIds) if (!reqs.has(id)) v.push({ ...base, problema: `@req:${id} nao existe em docs/rastreabilidade.`, comoCorrigir: `Cadastre o requisito ${id} em "requisitos" ou corrija a tag.` });
+    if (reqIds.length === 0) v.push({ ...base, problema: `teste "${t.titulo}" sem @req.`, comoCorrigir: `Adicione @req:<ID> apontando para um requisito em sistemas/<sut>/docs/rastreabilidade.json. ${exemplo}` });
+    for (const id of reqIds) if (!reqs.has(id)) v.push({ ...base, problema: `@req:${id} nao existe em sistemas/<sut>/docs/rastreabilidade.json.`, comoCorrigir: `Cadastre o requisito ${id} em "requisitos" ou corrija a tag.` });
 
     if (riscoIds.length === 0) v.push({ ...base, problema: `teste "${t.titulo}" sem @risco.`, comoCorrigir: `Adicione @risco:<ID> (docs/analise-de-risco.md). Sem risco nao ha como priorizar a regressao.` });
-    for (const id of riscoIds) if (!riscos.has(id)) v.push({ ...base, problema: `@risco:${id} nao existe em docs/rastreabilidade.`, comoCorrigir: `Cadastre o risco ${id} em "riscos" ou corrija a tag.` });
+    for (const id of riscoIds) if (!riscos.has(id)) v.push({ ...base, problema: `@risco:${id} nao existe em sistemas/<sut>/docs/rastreabilidade.json.`, comoCorrigir: `Cadastre o risco ${id} em "riscos" ou corrija a tag.` });
 
     if (coberturas.length === 0) v.push({ ...base, problema: `teste "${t.titulo}" sem @cobertura.`, comoCorrigir: `Adicione @cobertura:<ID do item de cobertura> (particao, limite, regra da tabela de decisao, transicao ou ramo). Se o teste nao satisfaz item algum, ele e candidato a remocao.` });
     for (const id of coberturas) {
@@ -68,9 +68,9 @@ export function analisar(testes: TesteListado[], dados: DadosDeRastreabilidade, 
 
   for (const item of dados.itensDeCobertura) {
     if (item.manual === true || cobertos.has(item.id)) continue;
-    v.push({ sensor: SENSOR, arquivo: 'docs/rastreabilidade', problema: `item de cobertura ${item.id} (${item.tecnica}: ${item.descricao}) do requisito ${item.requisito} nao tem teste automatizado.`, comoCorrigir: `Crie um teste com { tag: ['@cobertura:${item.id}', '@tecnica:${item.tecnica}', '@req:${item.requisito}', '@risco:<ID>'] } (use "npm run novo-teste"), ou marque "manual": true com justificativa em docs/planos.` });
+    v.push({ sensor: SENSOR, arquivo: 'sistemas/*/docs/rastreabilidade.json', problema: `item de cobertura ${item.id} (${item.tecnica}: ${item.descricao}) do requisito ${item.requisito} nao tem teste automatizado.`, comoCorrigir: `Crie um teste com { tag: ['@cobertura:${item.id}', '@tecnica:${item.tecnica}', '@req:${item.requisito}', '@risco:<ID>'] } (use "npm run novo-teste"), ou marque "manual": true com justificativa em docs/planos.` });
   }
-  for (const r of dados.requisitos) if (!riscos.has(r.risco)) v.push({ sensor: SENSOR, arquivo: 'docs/rastreabilidade', problema: `requisito ${r.id} aponta para risco inexistente ${r.risco}.`, comoCorrigir: `Cadastre o risco ou corrija a referencia.` });
+  for (const r of dados.requisitos) if (!riscos.has(r.risco)) v.push({ sensor: SENSOR, arquivo: 'sistemas/*/docs/rastreabilidade.json', problema: `requisito ${r.id} aponta para risco inexistente ${r.risco}.`, comoCorrigir: `Cadastre o risco ou corrija a referencia.` });
   return v;
 }
 

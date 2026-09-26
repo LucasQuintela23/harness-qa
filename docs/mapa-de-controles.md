@@ -6,7 +6,7 @@
 | Skill `/derivar-casos-de-teste` | guia | inferencial | comportamento do SUT | antes de escrever | partições/limites/regras esquecidos |
 | Skill `/conduzir-sessao-exploratoria`, templates, charters | guia | inferencial | comportamento do SUT | fora do ciclo / release | risco sem cobertura automatizada |
 | Scaffold `novo-teste` | guia | computacional | manutenibilidade | antes de escrever | metadado ausente, nome fora do padrão |
-| Contratos `support/contratos`, builders, `ProvedorDeAmbiente` | guia | computacional | fitness arquitetural | antes de escrever | acoplamento a driver/URL/credencial |
+| Contratos por sistema, builders, `ProvedorDeAmbiente`, isolamento entre sistemas (E9) | guia | computacional | fitness arquitetural | antes de escrever | acoplamento a driver/URL/credencial |
 | Análise de risco + matriz | guia | computacional | comportamento do SUT | planejamento | suíte sem priorização |
 | tsc strict + ESLint (+ plugin playwright) | sensor | computacional | manutenibilidade | pré-commit | tipos frouxos, sleep, condicional, skip/only |
 | Sensor `rastreabilidade` | sensor | computacional | comportamento do SUT | pré-commit e CI | teste sem técnica/req/risco; item de cobertura sem teste |

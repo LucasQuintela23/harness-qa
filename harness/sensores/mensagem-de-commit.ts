@@ -1,21 +1,16 @@
 import { readFileSync } from 'node:fs';
 
-const TIPOS: Record<string, string> = {
-  feat: ':sparkles:', fix: ':bug:', docs: ':books:', test: ':test_tube:', build: ':construction_worker:',
-  perf: ':zap:', style: ':art:', refactor: ':recycle:', chore: ':wrench:', ci: ':bricks:',
-  raw: ':card_file_box:', cleanup: ':broom:', remove: ':wastebasket:',
-};
+const TIPOS = ['feat', 'fix', 'docs', 'test', 'build', 'perf', 'style', 'refactor', 'chore', 'ci', 'raw', 'cleanup', 'remove'];
+const EMOJI = /\p{Extended_Pictographic}|:[a-z0-9_+-]+:/u;
 
 export function validar(primeiraLinha: string): string | undefined {
   if (/^(Merge|Revert|fixup!|squash!)/.test(primeiraLinha)) return undefined;
-  const m = /^(:[a-z0-9_+-]+:) ([a-z]+): (.+)$/.exec(primeiraLinha);
-  const modelo = 'Formato: <emoji> <tipo>: <descricao ate 4 palavras>. Ex.: ":test_tube: test: Cenarios de login". Tipos: ' +
-    Object.entries(TIPOS).map(([t, e]) => `${e} ${t}`).join(', ');
-  if (!m) return `Mensagem fora do padrao iuricode/padroes-de-commits. ${modelo}`;
-  const [, emoji = '', tipo = '', descricao = ''] = m;
-  const esperado = TIPOS[tipo];
-  if (!esperado) return `Tipo "${tipo}" invalido. ${modelo}`;
-  if (emoji !== esperado) return `Emoji ${emoji} nao corresponde ao tipo "${tipo}"; use ${esperado}.`;
+  const modelo = `Formato: <tipo>: <descricao ate 4 palavras>, sem emoji. Ex.: "test: Cenarios de login". Tipos: ${TIPOS.join(', ')}`;
+  if (EMOJI.test(primeiraLinha)) return `Commits nao devem ter emoji nem :codigo:. ${modelo}`;
+  const m = /^([a-z]+): (.+)$/.exec(primeiraLinha);
+  if (!m) return `Mensagem fora do padrao. ${modelo}`;
+  const [, tipo = '', descricao = ''] = m;
+  if (!TIPOS.includes(tipo)) return `Tipo "${tipo}" invalido. ${modelo}`;
   const palavras = descricao.trim().split(/\s+/).length;
   if (palavras > 4) return `Descricao com ${palavras} palavras (max 4). Resuma e detalhe no corpo do commit.`;
   return undefined;

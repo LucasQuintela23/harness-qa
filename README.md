@@ -2,7 +2,7 @@
 
 Harness de qualidade para automação de testes com **Playwright + TypeScript**. Ele combina o modelo de *Harness Engineering* (guias que orientam antes, sensores que medem depois) com as técnicas e o vocabulário do syllabus **ISTQB CTFL v4.0**.
 
-O primeiro sistema sob teste é a API [ServeRest](https://serverest.dev) (`tests/integracao/serverest`, `tests/contrato/serverest`; plano em `docs/planos/plano-serverest.md`). `src/exemplo`, `tests/componente/exemplo` e `docs/rastreabilidade/exemplo.json` são um exemplo fictício e descartável de componente.
+O primeiro sistema sob teste é a API [ServeRest](https://serverest.dev) (`sistemas/serverest`; plano em `sistemas/serverest/docs/plano-de-teste.md`). `sistemas/exemplo` é um exemplo fictício e descartável de teste de componente.
 
 ## Ideia central
 
@@ -28,30 +28,37 @@ Os controles atuam em três dimensões: manutenibilidade da suíte, fitness arqu
 ### Estrutura de diretórios
 
 ```
-harness/
+harness/            o harness, genérico e independente de sistema
   config/           politica.json (técnicas, níveis, orçamentos) e stryker.config.json
   guias/skills/     skills inferenciais (também acessíveis em .claude/skills)
-  guias/scaffold/   gerador de esqueleto de teste (npm run novo-teste)
+  guias/scaffold/   novo-sistema e novo-teste
   sensores/         sensores computacionais e lib/ (AST, relatório, política)
   sensores/inferenciais/  rubrica do LLM-as-judge
   loop/             loop de direção (o que fazer quando o mesmo defeito escapa duas vezes)
-tests/              um diretório por nível: componente, contrato, integracao, e2e,
-                    acessibilidade, performance (k6), exploratorio
-support/            contratos (interfaces pequenas), ambiente, builders, clients, page-objects
-src/exemplo/        código de exemplo descartável
-docs/               estratégia, análise de risco, templates, rastreabilidade, planos, charters
+sistemas/           um diretório por sistema sob teste
+  <sut>/
+    tests/<nivel>/  componente, contrato, integracao, e2e, acessibilidade (+ performance com k6)
+    support/        contratos, clients, builders, massa, fixtures e page objects DO sistema
+    src/            código de produto (só quando há; o exemplo fictício tem)
+    docs/           plano-de-teste.md, rastreabilidade.json, charters/ e MATRIZ.md (gerada)
+  serverest/        API ServeRest (primeiro SUT real)
+  exemplo/          exemplo fictício e descartável de componente
+support/            suporte compartilhado entre sistemas (importado via @compartilhado/...):
+                    ambiente (variáveis), contratos genéricos (RespostaHttp) e transporte HTTP
+docs/               transversal: estratégia, análise de risco, templates, mapa de controles, limites, roadmap
 .githooks/          commit-msg, pre-commit, pre-push
 .github/workflows/  pipeline de CI por estágios de custo
 ```
 
 ### Regras de dependência
 
-- `tests` depende de contratos em `support/contratos`, nunca de driver, URL ou credencial concretos (DIP). A implementação entra por fixture.
+- Os testes de um sistema dependem dos contratos do próprio sistema (`sistemas/<sut>/support/contratos`), nunca de driver, URL ou credencial concretos (DIP). A implementação entra por fixture.
+- Sistemas não se importam entre si, e o `support/` compartilhado não conhece nenhum sistema (E9).
 - Page objects não contêm asserção. Builders não conhecem transporte. Contratos têm no máximo 7 membros e nenhuma implementação.
-- `src` nunca importa de `tests` nem de `support`.
+- O `src` de um sistema nunca importa `tests` nem `support`.
 - Specs não importam outros specs e não têm estado mutável de módulo.
 
-O sensor `estrutural` (regras E1 a E8) verifica isso automaticamente.
+O sensor `estrutural` (regras E1 a E9) verifica isso automaticamente.
 
 ## Sensores computacionais
 
@@ -60,10 +67,10 @@ O sensor `estrutural` (regras E1 a E8) verifica isso automaticamente.
 | `rastreabilidade` | teste sem `@tecnica`, `@req`, `@risco` ou `@cobertura`; item de cobertura do plano sem teste; inconsistência entre teste, item e requisito |
 | `assercoes` | teste sem `expect`, asserção trivial ou só com matchers fracos, `if`/laço no teste, espera fixa, mais de 3 asserções |
 | `duplicados` | testes com corpo idêntico |
-| `estrutural` | violações de camada, URL literal, `process.env` em teste, segredo em literal, estado global |
+| `estrutural` | violações de camada, URL literal, `process.env` em teste, segredo em literal, estado global, dependência entre sistemas |
 | `flakiness` e `tempo-de-suite` | testes que só passam com retry e suítes acima do orçamento por nível |
 | `drift` | flakiness acumulada, testes mortos ou sempre ignorados, cobertura de requisitos por nível de risco, dependências desatualizadas |
-| `mensagem-de-commit` | commit fora do padrão `<emoji> <tipo>: <até 4 palavras>` |
+| `mensagem-de-commit` | commit fora do padrão `<tipo>: <até 4 palavras>` ou com emoji |
 
 ## Metadado de teste
 
@@ -75,7 +82,7 @@ test('rejeita 11 (acima do limite superior)', {
 });
 ```
 
-Técnicas aceitas (códigos em `harness/config/politica.json`): `EP`, `BVA2`, `BVA3`, `DT`, `ST`, `STMT`, `BRANCH`, `EG`, `CHK`, `ATDD`, `EXPL`. Requisitos, riscos e itens de cobertura vivem em `docs/rastreabilidade/*.json`.
+Técnicas aceitas (códigos em `harness/config/politica.json`): `EP`, `BVA2`, `BVA3`, `DT`, `ST`, `STMT`, `BRANCH`, `EG`, `CHK`, `ATDD`, `EXPL`. Requisitos, riscos e itens de cobertura vivem em `sistemas/<sut>/docs/rastreabilidade.json`.
 
 ## Quando cada controle roda
 
@@ -106,13 +113,14 @@ npm install                 # instala dependências e ativa os hooks
 npm run verificar           # typecheck + lint + sensores estáticos + testes de componente
 npm run cobertura           # comandos e ramos (c8)
 npm run mutacao             # mutation testing (Stryker)
-npm run matriz              # gera docs/rastreabilidade/MATRIZ.md
-npm run novo-teste -- <nivel> <nome> <TECNICA> <REQ> <RISCO> <ITEM>
+npm run matriz              # gera sistemas/<sut>/docs/MATRIZ.md, uma por sistema
+npm run novo-sistema -- <nome>
+npm run novo-teste -- <sistema> <nivel> <nome> <TECNICA> <REQ> <RISCO> <ITEM>
 ```
 
 Fluxo para um teste novo: cadastre requisito e risco, rode a skill `/derivar-casos-de-teste` (as tabelas vêm antes do código), registre os itens de cobertura, gere o esqueleto, implemente e valide com `npm run verificar`.
 
-Commits seguem [iuricode/padroes-de-commits](https://github.com/iuricode/padroes-de-commits), por exemplo `:test_tube: test: Cenários de login`. Segredos vêm só de variáveis de ambiente (veja `.env.example`).
+Commits seguem Conventional Commits, sem emoji, por exemplo `test: Cenários de login`. Segredos vêm só de variáveis de ambiente (veja `.env.example`).
 
 ## Onde ler mais
 

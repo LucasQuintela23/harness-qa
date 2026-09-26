@@ -17,3 +17,13 @@ export function listarTs(dirRelativo: string, sufixo = '.ts'): string[] {
   visitar(inicio);
   return achados.sort();
 }
+
+export function listarSistemas(): string[] {
+  const base = join(RAIZ, 'sistemas');
+  try { return readdirSync(base).filter((d) => statSync(join(base, d)).isDirectory()).sort(); } catch { return []; }
+}
+
+export const listarSpecs = (): string[] => listarSistemas().flatMap((s) => listarTs(`sistemas/${s}/tests`, '.spec.ts'));
+
+/** Todo TypeScript de suporte e produto: support/ compartilhado e sistemas/<sut>/{src,support,tests}. */
+export const listarCodigo = (): string[] => [...listarTs('support'), ...listarTs('sistemas')];

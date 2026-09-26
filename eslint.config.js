@@ -17,7 +17,7 @@ export default tseslint.config(
     ...tseslint.configs.disableTypeChecked,
   },
   {
-    files: ['tests/**/*.spec.ts'],
+    files: ['sistemas/**/tests/**/*.spec.ts'],
     ...playwright.configs['flat/recommended'],
     rules: {
       ...playwright.configs['flat/recommended'].rules,
@@ -37,10 +37,10 @@ export default tseslint.config(
     },
   },
   {
-    files: ['tests/**/*.spec.ts'],
+    files: ['sistemas/**/tests/**/*.spec.ts'],
     rules: {
       'no-restricted-imports': ['error', {
-        patterns: [{ group: ['**/page-objects/*Impl*', '**/clients/*Http*'], message: 'Testes dependem de contratos em support/contratos, nao de implementacoes. Injete via fixture.' }],
+        patterns: [{ group: ['**/page-objects/*Impl*', '**/clients/*Http*'], message: 'Testes dependem de contratos em support/contratos do sistema, nao de implementacoes. Injete via fixture.' }],
       }],
     },
   },

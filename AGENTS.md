@@ -3,9 +3,10 @@
 Este repositório é um harness de testes (Playwright + TypeScript). O agente escreve e revisa testes; o harness guia antes (feedforward) e mede depois (feedback). Leia isto antes de qualquer alteração.
 
 ## Fluxo obrigatório para um teste novo
-1. Requisito e risco existem em `docs/rastreabilidade/*.json`? Se não, cadastre (risco: `docs/analise-de-risco.md`).
+0. Cada sistema sob teste vive em `sistemas/<sut>/` (tests, support, docs). Novo sistema: `npm run novo-sistema -- <nome>`. Um sistema nunca importa outro (sensor E9); o que for genérico fica em `support/` e é importado via `@compartilhado/...`.
+1. Requisito e risco existem em `sistemas/<sut>/docs/rastreabilidade.json`? Se não, cadastre (risco: `docs/analise-de-risco.md`).
 2. Rode a skill `/derivar-casos-de-teste`: ela devolve a tabela de partições/limites/decisão/estados **antes** do código e os itens de cobertura.
-3. Registre os itens em `itensDeCobertura`. Gere o esqueleto: `npm run novo-teste -- <nivel> <nome> <TECNICA> <REQ> <RISCO> <ITEM>`.
+3. Registre os itens em `itensDeCobertura`. Gere o esqueleto: `npm run novo-teste -- <sistema> <nivel> <nome> <TECNICA> <REQ> <RISCO> <ITEM>`.
 4. Implemente. Valide: `npm run verificar`. Corrija seguindo o campo COMO CORRIGIR das mensagens dos sensores.
 5. Commit no padrão abaixo. Antes do PR: `/revisar-teste`.
 
@@ -28,26 +29,26 @@ Uma `@tecnica`, ao menos um `@req`, `@risco` e `@cobertura`. Todo item de cobert
 | EG | Error guessing (catálogo em `docs/estrategia-de-testes.md`) | defeito do catálogo |
 | CHK | Baseado em checklist | item do checklist |
 | ATDD | Critério de aceite Gherkin (rastrear até a técnica caixa-preta de origem) | critério de aceite |
-| EXPL | Exploratório com charter (`docs/charters`) | charter executado |
+| EXPL | Exploratório com charter (`sistemas/<sut>/docs/charters`) | charter executado |
 Técnica fora do syllabus só entra em `harness/config/politica.json` marcada como **extensão**.
 
 ## Regras de código
 - SRP: um teste, um comportamento, no máximo 3 `expect`. Page object sem asserção. Builder não conhece transporte.
 - OCP: novo cenário = nova linha de dados, não edição de helper.
-- LSP/ISP: contratos pequenos em `support/contratos` (≤ 7 membros, sem implementação); sem `BasePage` gigante.
-- DIP: teste depende de contrato injetado por fixture; nunca de driver, URL ou credencial (`process.env` só em `support/ambiente`).
+- LSP/ISP: contratos pequenos em `sistemas/<sut>/support/contratos` (≤ 7 membros, sem implementação); sem `BasePage` gigante.
+- DIP: teste depende de contrato injetado por fixture; nunca de driver, URL ou credencial (`process.env` só em `support/ambiente`, compartilhado).
 - Sem `waitForTimeout`/sleep, sem `if`/laço no corpo do teste, sem estado mutável de módulo, sem dependência entre specs, sem `test.only`/`skip` sem defeito registrado.
 - Dados isolados e determinísticos; segredos só por variável de ambiente (`.env` local ignorado).
 - Alocação por camada: pergunte "o componente resolve?" antes de escrever E2E (pirâmide/quadrantes em `docs/estrategia-de-testes.md`).
 
 ## Comandos
-`npm run verificar` (rápido) · `npm run cobertura` (comandos/ramos: critério de saída de componente, não meta) · `npm run mutacao` · `npm run matriz` · `npm run sensores:{estaticos,relatorio,drift}`.
+`npm run verificar` (rápido) · `npm run cobertura` (comandos/ramos: critério de saída de componente, não meta) · `npm run mutacao` · `npm run matriz` (uma matriz por sistema) · `npm run sensores:{estaticos,relatorio,drift}`.
 
-## Commits (iuricode/padroes-de-commits)
-`<emoji> <tipo>: <descrição, máx. 4 palavras>` — feat :sparkles:, fix :bug:, docs :books:, test :test_tube:, build :construction_worker:, perf :zap:, style :art:, refactor :recycle:, chore :wrench:, ci :bricks:, raw :card_file_box:, cleanup :broom:, remove :wastebasket:. Ex.: `:test_tube: test: Cenários de login`. O hook `commit-msg` bloqueia o restante.
+## Commits (Conventional Commits, sem emoji)
+`<tipo>: <descrição, máx. 4 palavras>`. Tipos: feat, fix, docs, test, build, perf, style, refactor, chore, ci, raw, cleanup, remove. Ex.: `test: Cenários de login`. O hook `commit-msg` bloqueia mensagens com emoji ou `:código:` e qualquer formato fora disso. Commit e push só quando o usuário pedir.
 
 ## Skills (`harness/guias/skills`, também em `.claude/skills`)
 `/derivar-casos-de-teste` · `/revisar-teste` · `/revisar-plano-de-teste` · `/auditar-cobertura-de-risco` · `/conduzir-sessao-exploratoria`.
 
 ## Dados de exemplo
-`src/exemplo`, `tests/componente/exemplo` e `docs/rastreabilidade/exemplo.json` são um exemplo descartável e fictício. Apague ao ligar o SUT real.
+`sistemas/exemplo` é um exemplo descartável e fictício de componente; apague a pasta quando não precisar mais dele. `sistemas/serverest` é o primeiro SUT real (API ServeRest).

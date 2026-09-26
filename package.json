@@ -22,6 +22,7 @@
     "mutacao": "stryker run harness/config/stryker.config.json",
     "matriz": "tsx harness/sensores/matriz.ts",
     "novo-teste": "tsx harness/guias/scaffold/novo-teste.ts",
+    "novo-sistema": "tsx harness/guias/scaffold/novo-sistema.ts",
     "servidor:local": "serverest --nodoc --porta 3000",
     "verificar": "npm run typecheck && npm run lint && npm run sensores:estaticos && npm run test:componente"
   },

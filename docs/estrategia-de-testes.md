@@ -14,11 +14,11 @@
 ## Níveis e alocação (pirâmide + quadrantes)
 | Nível CTFL | Pasta | Técnicas típicas | Orçamento |
 |---|---|---|---|
-| Componente | `tests/componente` | EP, BVA, DT, ST, STMT, BRANCH | 30 s |
-| Integração de componentes | `tests/contrato`, `tests/integracao` | EP, DT, EG | 60–180 s |
-| Sistema | `tests/e2e`, `tests/acessibilidade` | ST, CHK, ATDD | 600 s |
-| Integração de sistemas / Aceite | `tests/e2e` (tag ATDD), `tests/exploratorio` | ATDD, EXPL | por release |
-Regra de alocação: cenário vai para o nível mais baixo capaz de detectar o defeito. E2E só para fluxos de valor e integração real. Tipos: funcional, não funcional (k6 em `tests/performance`, acessibilidade), caixa-branca (componente) e relacionado a mudança (confirmação + regressão).
+| Componente | `sistemas/<sut>/tests/componente` | EP, BVA, DT, ST, STMT, BRANCH | 30 s |
+| Integração de componentes | `.../tests/contrato`, `.../tests/integracao` | EP, DT, EG | 60–180 s |
+| Sistema | `.../tests/e2e`, `.../tests/acessibilidade` | ST, CHK, ATDD | 600 s |
+| Integração de sistemas / Aceite | `.../tests/e2e` (tag ATDD), charters em `sistemas/<sut>/docs/charters` | ATDD, EXPL | por release |
+Regra de alocação: cenário vai para o nível mais baixo capaz de detectar o defeito. E2E só para fluxos de valor e integração real. Tipos: funcional, não funcional (k6 em `sistemas/<sut>/tests/performance`, cada script declarando requisito não funcional e risco, acessibilidade), caixa-branca (componente) e relacionado a mudança (confirmação + regressão).
 
 ## Confirmação e regressão
 Correção de defeito → teste de confirmação (reprodução vira teste automatizado com `@risco`) + regressão. A suíte de regressão é selecionada por risco: `--grep "@risco:<ids de nivel alto/critico>"` em cada mudança; suíte completa noturna. Justificativa registrada no plano de teste.
@@ -39,7 +39,7 @@ Revisão de requisito e de plano antes de codar (`/revisar-plano-de-teste`), lin
 Nulo/vazio/espaços, tipo errado, Unicode e tamanho extremo, dupla submissão, concorrência na mesma entidade, fuso e virada de data, arredondamento monetário, permissão de outro usuário, retry idempotente, timeout parcial.
 
 ## Exploratório
-Session-based, 60–90 min, charters versionados em `docs/charters` (template em `docs/templates`), débrief gera defeitos e novos itens EG/CHK.
+Session-based, 60–90 min, charters versionados em `sistemas/<sut>/docs/charters` (template em `docs/templates`), débrief gera defeitos e novos itens EG/CHK.
 
 ## Estrutura de defeito
 Template em `docs/templates/relatorio-de-defeito.md` (campos CTFL: identificador, título, data, organização/autor, contexto, descrição, resultado esperado/real, severidade, prioridade, status, referências).

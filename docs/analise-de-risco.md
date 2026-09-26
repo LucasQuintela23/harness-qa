@@ -11,7 +11,7 @@ Probabilidade (1–5) x Impacto (1–5) = severidade. Nível: **crítico** ≥ 2
 | 1 | 1 baixo | 2 baixo | 3 baixo | 4 baixo | 5 baixo |
 
 Profundidade mínima: crítico/alto → BVA3 + DT/ST + exploratório + regressão em toda mudança; médio → EP + BVA2 + regressão noturna; baixo → EP/CHK.
-Registro: cada risco vive em `docs/rastreabilidade/*.json` (`id, descricao, probabilidade, impacto, nivel`) e é referenciado por requisito e teste (`@risco:`). Reavalie após cada defeito escapado e a cada release.
+Registro: cada risco vive em `sistemas/<sut>/docs/rastreabilidade.json` (`id, descricao, probabilidade, impacto, nivel`) e é referenciado por requisito e teste (`@risco:`). Reavalie após cada defeito escapado e a cada release.
 
 | Risco | Descrição | P | I | Nível | Requisitos |
 |---|---|---|---|---|---|

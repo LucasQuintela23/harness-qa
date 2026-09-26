@@ -1,6 +1,6 @@
 {
   "all": false,
-  "include": ["src/**/*.ts"],
+  "include": ["sistemas/*/src/**/*.ts"],
   "exclude": ["**/*.spec.ts"],
   "reporter": ["text-summary", "json-summary"],
   "reports-dir": "coverage",

@@ -1,6 +1,6 @@
 import { createHash } from 'node:crypto';
 import { abrir, encontrarTestes, linhaDe } from './lib/ast.js';
-import { listarTs } from './lib/arquivos.js';
+import { listarSpecs } from './lib/arquivos.js';
 import type { Violacao } from './lib/relatorio.js';
 
 const SENSOR = 'duplicados';
@@ -8,7 +8,7 @@ const SENSOR = 'duplicados';
 /** Heuristica: mesmo corpo normalizado (sem espacos/comentarios) = duplicado. Nao detecta duplicacao puramente semantica; isso fica com /revisar-teste. */
 export function executar(): Violacao[] {
   const grupos = new Map<string, { arquivo: string; linha: number; titulo: string }[]>();
-  for (const arquivo of listarTs('tests', '.spec.ts')) {
+  for (const arquivo of listarSpecs()) {
     const sf = abrir(arquivo);
     for (const t of encontrarTestes(sf)) {
       if (!t.corpo) continue;

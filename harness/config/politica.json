@@ -1,15 +1,50 @@
 {
-  "tecnicasPermitidas": ["EP", "BVA2", "BVA3", "DT", "ST", "STMT", "BRANCH", "EG", "CHK", "ATDD", "EXPL"],
-  "niveis": ["componente", "integracao-componentes", "sistema", "integracao-sistemas", "aceite"],
-  "diretorioParaNivel": {
-    "tests/componente": "componente",
-    "tests/contrato": "integracao-componentes",
-    "tests/integracao": "integracao-componentes",
-    "tests/e2e": "sistema",
-    "tests/acessibilidade": "sistema"
+  "tecnicasPermitidas": [
+    "EP",
+    "BVA2",
+    "BVA3",
+    "DT",
+    "ST",
+    "STMT",
+    "BRANCH",
+    "EG",
+    "CHK",
+    "ATDD",
+    "EXPL"
+  ],
+  "niveis": [
+    "componente",
+    "integracao-componentes",
+    "sistema",
+    "integracao-sistemas",
+    "aceite"
+  ],
+  "orcamentoDeTempoSegundos": {
+    "componente": 30,
+    "contrato": 60,
+    "integracao": 180,
+    "e2e": 600,
+    "acessibilidade": 300
   },
-  "orcamentoDeTempoSegundos": { "componente": 30, "contrato": 60, "integracao": 180, "e2e": 600, "acessibilidade": 300 },
   "maxTestesPorArquivo": 40,
-  "rastreabilidade": { "dir": "docs/rastreabilidade" },
-  "drift": { "diasSemExecucaoParaTesteMorto": 30, "flakinessMaximaPercentual": 2, "coberturaDeRiscoMinimaPorNivel": { "critico": 100, "alto": 100, "medio": 60, "baixo": 0 } }
+  "rastreabilidade": {
+    "arquivo": "docs/rastreabilidade.json"
+  },
+  "drift": {
+    "diasSemExecucaoParaTesteMorto": 30,
+    "flakinessMaximaPercentual": 2,
+    "coberturaDeRiscoMinimaPorNivel": {
+      "critico": 100,
+      "alto": 100,
+      "medio": 60,
+      "baixo": 0
+    }
+  },
+  "pastasPorNivel": {
+    "componente": "componente",
+    "contrato": "integracao-componentes",
+    "integracao": "integracao-componentes",
+    "e2e": "sistema",
+    "acessibilidade": "sistema"
+  }
 }

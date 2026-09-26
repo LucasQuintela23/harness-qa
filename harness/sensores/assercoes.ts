@@ -1,6 +1,6 @@
 import ts from 'typescript';
 import { abrir, encontrarTestes, linhaDe, percorrer, raizDaChamada } from './lib/ast.js';
-import { listarTs } from './lib/arquivos.js';
+import { listarSpecs } from './lib/arquivos.js';
 import { carregarPolitica } from './lib/politica.js';
 import type { Violacao } from './lib/relatorio.js';
 
@@ -48,5 +48,5 @@ export function analisarArquivo(arquivo: string): Violacao[] {
 }
 
 export function executar(): Violacao[] {
-  return listarTs('tests', '.spec.ts').flatMap(analisarArquivo);
+  return listarSpecs().flatMap(analisarArquivo);
 }

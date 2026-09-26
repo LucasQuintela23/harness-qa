@@ -1,6 +1,7 @@
+import { dirname, join, normalize } from 'node:path';
 import ts from 'typescript';
 import { abrir, linhaDe, percorrer } from './lib/ast.js';
-import { listarTs } from './lib/arquivos.js';
+import { listarCodigo } from './lib/arquivos.js';
 import type { Violacao } from './lib/relatorio.js';
 
 const SENSOR = 'estrutural';
@@ -9,7 +10,7 @@ const SEGREDO = /(password|senha|token|secret|apikey|api_key)/i;
 /** Literal parece segredo: sem espacos (mensagens tem) e com 6+ caracteres (evita falso positivo em 'x'). */
 const pareceSegredo = (texto: string): boolean => texto.length >= 6 && !/\s/.test(texto);
 
-interface Regra { id: string; onde: string; sufixo?: string; verificar: (sf: ts.SourceFile, arquivo: string) => Violacao[] }
+interface Regra { id: string; onde: RegExp; verificar: (sf: ts.SourceFile, arquivo: string) => Violacao[] }
 
 const v = (arquivo: string, sf: ts.SourceFile, no: ts.Node, problema: string, comoCorrigir: string): Violacao => ({ sensor: SENSOR, arquivo, linha: linhaDe(sf, no), problema, comoCorrigir });
 
@@ -17,13 +18,13 @@ const importacoes = (sf: ts.SourceFile): ts.ImportDeclaration[] => sf.statements
 const modulo = (i: ts.ImportDeclaration): string => (ts.isStringLiteral(i.moduleSpecifier) ? i.moduleSpecifier.text : '');
 
 const REGRAS: Regra[] = [
-  { id: 'E1', onde: 'support/page-objects', verificar: (sf, a) => {
+  { id: 'E1', onde: /^(sistemas\/[^/]+\/)?support\/page-objects\/.*\.ts$/, verificar: (sf, a) => {
     const r: Violacao[] = [];
     percorrer(sf, (n) => { if (ts.isCallExpression(n) && ts.isIdentifier(n.expression) && n.expression.text === 'expect') r.push(v(a, sf, n, 'E1 page object contem asserção (SRP).', 'Page object expoe estado (ex.: async mensagemDeErro(): Promise<string>); a asserção fica no teste.')); });
     return r;
   } },
-  { id: 'E2', onde: 'support/builders', verificar: (sf, a) => importacoes(sf).filter((i) => /playwright|node:http|axios|undici/.test(modulo(i))).map((i) => v(a, sf, i, `E2 builder importa transporte (${modulo(i)}).`, 'Builder so monta dados. Envio pertence a um client em support/clients atras de um contrato em support/contratos (DIP).')) },
-  { id: 'E3', onde: 'tests', sufixo: '.spec.ts', verificar: (sf, a) => {
+  { id: 'E2', onde: /^(sistemas\/[^/]+\/)?support\/builders\/.*\.ts$/, verificar: (sf, a) => importacoes(sf).filter((i) => /playwright|node:http|axios|undici/.test(modulo(i))).map((i) => v(a, sf, i, `E2 builder importa transporte (${modulo(i)}).`, 'Builder so monta dados. Envio pertence a um client em support/clients atras de um contrato em support/contratos (DIP).')) },
+  { id: 'E3', onde: /^sistemas\/[^/]+\/tests\/.*\.spec\.ts$/, verificar: (sf, a) => {
     const r: Violacao[] = [];
     for (const i of importacoes(sf)) {
       const nomes = i.importClause?.namedBindings;
@@ -33,7 +34,7 @@ const REGRAS: Regra[] = [
     }
     return r;
   } },
-  { id: 'E4', onde: 'tests', sufixo: '.spec.ts', verificar: (sf, a) => {
+  { id: 'E4', onde: /^sistemas\/[^/]+\/tests\/.*\.spec\.ts$/, verificar: (sf, a) => {
     const r: Violacao[] = [];
     percorrer(sf, (n) => {
       if ((ts.isStringLiteral(n) || ts.isNoSubstitutionTemplateLiteral(n)) && /^https?:\/\//.test(n.text)) r.push(v(a, sf, n, `E4 URL literal "${n.text}" no teste.`, 'Obtenha de ProvedorDeAmbiente (support/ambiente) via fixture; URL vem de variavel de ambiente.'));
@@ -41,10 +42,10 @@ const REGRAS: Regra[] = [
     });
     return r;
   } },
-  { id: 'E5', onde: 'tests', sufixo: '.spec.ts', verificar: (sf, a) => sf.statements.filter(ts.isVariableStatement)
+  { id: 'E5', onde: /^sistemas\/[^/]+\/tests\/.*\.spec\.ts$/, verificar: (sf, a) => sf.statements.filter(ts.isVariableStatement)
     .filter((s) => !(s.declarationList.flags & ts.NodeFlags.Const))
     .map((s) => v(a, sf, s, 'E5 estado mutavel no escopo do modulo (let/var).', 'Use const, ou crie o estado dentro do teste/fixture. Estado global quebra paralelismo e idempotencia.')) },
-  { id: 'E6', onde: 'support/contratos', verificar: (sf, a) => {
+  { id: 'E6', onde: /^(sistemas\/[^/]+\/)?support\/contratos\/.*\.ts$/, verificar: (sf, a) => {
     const r: Violacao[] = [];
     for (const s of sf.statements) {
       if (ts.isInterfaceDeclaration(s) && s.members.length > 7) r.push(v(a, sf, s, `E6 interface ${s.name.text} com ${s.members.length} membros (max 7, ISP).`, 'Divida por capacidade (ex.: Autenticavel, Consultavel).'));
@@ -52,8 +53,8 @@ const REGRAS: Regra[] = [
     }
     return r;
   } },
-  { id: 'E7', onde: 'src', verificar: (sf, a) => importacoes(sf).filter((i) => /\/(tests|support)\//.test(modulo(i)) || /^\.\.?\/.*\b(tests|support)\b/.test(modulo(i))).map((i) => v(a, sf, i, 'E7 codigo de produto importa teste/suporte.', 'Dependencia so aponta de testes para o produto, nunca o inverso.')) },
-  { id: 'E8', onde: '.', verificar: (sf, a) => {
+  { id: 'E7', onde: /^sistemas\/[^/]+\/src\/.*\.ts$/, verificar: (sf, a) => importacoes(sf).filter((i) => /(^|\/)(tests|support)\//.test(modulo(i)) || /^@compartilhado\//.test(modulo(i))).map((i) => v(a, sf, i, 'E7 codigo de produto importa teste/suporte.', 'Dependencia so aponta de testes para o produto, nunca o inverso.')) },
+  { id: 'E8', onde: /\.ts$/, verificar: (sf, a) => {
     const r: Violacao[] = [];
     percorrer(sf, (n) => {
       if (ts.isVariableDeclaration(n) && ts.isIdentifier(n.name) && SEGREDO.test(n.name.text) && n.initializer && ts.isStringLiteralLike(n.initializer) && pareceSegredo(n.initializer.text)) r.push(v(a, sf, n, `E8 possivel segredo em literal (${n.name.text}).`, 'Segredos vem de variavel de ambiente via ProvedorDeAmbiente; use .env local e secrets do CI.'));
@@ -61,12 +62,24 @@ const REGRAS: Regra[] = [
     });
     return r;
   } },
+  { id: 'E9', onde: /^(support|sistemas)\/.*\.ts$/, verificar: (sf, a) => {
+    const dono = /^sistemas\/([^/]+)\//.exec(a)?.[1];
+    const r: Violacao[] = [];
+    for (const i of importacoes(sf)) {
+      if (!modulo(i).startsWith('.')) continue;
+      const alvo = normalize(join(dirname(a), modulo(i))).replaceAll('\\', '/');
+      const destino = /^sistemas\/([^/]+)\//.exec(alvo)?.[1];
+      if (destino === undefined || destino === dono) continue;
+      r.push(v(a, sf, i, dono === undefined ? `E9 suporte compartilhado importa o sistema "${destino}".` : `E9 sistema "${dono}" importa o sistema "${destino}".`, 'Sistemas nao se conhecem e o suporte compartilhado nao conhece sistemas. Promova o que for generico para support/ (importado via @compartilhado) ou duplique o especifico.'));
+    }
+    return r;
+  } },
 ];
 
 export function executar(): Violacao[] {
   const resultado: Violacao[] = [];
   for (const regra of REGRAS) {
-    const alvo = regra.onde === '.' ? [...listarTs('src'), ...listarTs('support'), ...listarTs('tests')] : listarTs(regra.onde, regra.sufixo ?? '.ts');
+    const alvo = listarCodigo().filter((arquivo) => regra.onde.test(arquivo));
     for (const arquivo of alvo) resultado.push(...regra.verificar(abrir(arquivo), arquivo));
   }
   return resultado;

@@ -4,10 +4,10 @@ import { join } from 'node:path';
 export interface Politica {
   tecnicasPermitidas: string[];
   niveis: string[];
-  diretorioParaNivel: Record<string, string>;
+  pastasPorNivel: Record<string, string>;
   orcamentoDeTempoSegundos: Record<string, number>;
   maxTestesPorArquivo: number;
-  rastreabilidade: { dir: string };
+  rastreabilidade: { arquivo: string };
   drift: {
     diasSemExecucaoParaTesteMorto: number;
     flakinessMaximaPercentual: number;

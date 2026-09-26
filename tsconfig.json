@@ -12,7 +12,20 @@
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "noEmit": true,
-    "types": ["node"]
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+    "paths": {
+      "@compartilhado/*": [
+        "support/*"
+      ]
+    }
   },
-  "include": ["src", "support", "tests", "harness", "*.ts"]
+  "include": [
+    "sistemas",
+    "support",
+    "harness",
+    "*.ts"
+  ]
 }

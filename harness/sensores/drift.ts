@@ -56,7 +56,7 @@ export function executar(): Violacao[] {
     if (reqs.length === 0) continue;
     const cobertos = reqs.filter((r) => testes.some((t) => t.tags.includes(`@req:${r.id}`))).length;
     const pct = (cobertos / reqs.length) * 100;
-    if (pct < minimo) v.push({ sensor: SENSOR, arquivo: 'docs/rastreabilidade', problema: `cobertura de requisitos de risco ${nivel}: ${pct.toFixed(0)}% (minimo ${minimo}%).`, comoCorrigir: `Priorize casos para os requisitos de risco ${nivel} sem teste (npm run matriz mostra quais).` });
+    if (pct < minimo) v.push({ sensor: SENSOR, arquivo: 'sistemas/*/docs/rastreabilidade.json', problema: `cobertura de requisitos de risco ${nivel}: ${pct.toFixed(0)}% (minimo ${minimo}%).`, comoCorrigir: `Priorize casos para os requisitos de risco ${nivel} sem teste (npm run matriz mostra quais).` });
   }
 
   try {

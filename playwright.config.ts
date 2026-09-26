@@ -5,8 +5,8 @@ try { process.loadEnvFile(); } catch { /* sem .env: variaveis vem do ambiente */
 const emCI = Boolean(process.env['CI']);
 
 export default defineConfig({
-  testDir: './tests',
-  testMatch: '**/*.spec.ts',
+  testDir: './sistemas',
+  testMatch: '**/tests/**/*.spec.ts',
   fullyParallel: true,
   forbidOnly: emCI,
   retries: emCI ? 1 : 0,
@@ -17,10 +17,10 @@ export default defineConfig({
     trace: 'retain-on-failure',
   },
   projects: [
-    { name: 'componente', testDir: './tests/componente' },
-    { name: 'contrato', testDir: './tests/contrato' },
-    { name: 'integracao', testDir: './tests/integracao' },
-    { name: 'e2e', testDir: './tests/e2e', use: { ...devices['Desktop Chrome'] } },
-    { name: 'acessibilidade', testDir: './tests/acessibilidade', use: { ...devices['Desktop Chrome'] } },
+    { name: 'componente', testMatch: '**/tests/componente/**/*.spec.ts' },
+    { name: 'contrato', testMatch: '**/tests/contrato/**/*.spec.ts' },
+    { name: 'integracao', testMatch: '**/tests/integracao/**/*.spec.ts' },
+    { name: 'e2e', testMatch: '**/tests/e2e/**/*.spec.ts', use: { ...devices['Desktop Chrome'] } },
+    { name: 'acessibilidade', testMatch: '**/tests/acessibilidade/**/*.spec.ts', use: { ...devices['Desktop Chrome'] } },
   ],
 });

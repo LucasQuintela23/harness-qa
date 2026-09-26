@@ -5,7 +5,7 @@
     "command": "npx playwright test --project=componente --reporter=dot"
   },
   "mutate": [
-    "src/**/*.ts"
+    "sistemas/*/src/**/*.ts"
   ],
   "checkers": [
     "typescript"

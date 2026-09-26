@@ -5,7 +5,7 @@ description: Recebe um requisito e devolve casos de teste derivados por técnica
 # /derivar-casos-de-teste <requisito>
 
 1. **Entenda o requisito.** Se ambíguo ou não testável, pare e liste as perguntas (teste estático); não invente regras.
-2. **Risco e nível.** Consulte `docs/rastreabilidade/*.json`/`docs/analise-de-risco.md`; se ausentes, proponha P, I e nível. Escolha o nível de teste mais baixo capaz de detectar o defeito (pirâmide).
+2. **Risco e nível.** Consulte `sistemas/<sut>/docs/rastreabilidade.json`/`docs/analise-de-risco.md`; se ausentes, proponha P, I e nível. Escolha o nível de teste mais baixo capaz de detectar o defeito (pirâmide).
 3. **Escolha a técnica** e justifique:
    - domínio numérico/faixa → EP + BVA (declare **BVA2 ou BVA3**; risco alto/crítico → BVA3);
    - regras combinatórias → tabela de decisão (DT), reduzindo colunas impossíveis com justificativa;
