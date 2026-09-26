@@ -1,0 +1,38 @@
+{
+  "requisitos": [
+    { "id": "REQ-EX-001", "titulo": "Quantidade do item deve ser inteiro de 1 a 10", "risco": "R-EX-001" },
+    { "id": "REQ-EX-002", "titulo": "Desconto por volume, fidelidade e cupom, limitado a 15%", "risco": "R-EX-002" },
+    { "id": "REQ-EX-003", "titulo": "Ciclo de vida do pedido respeita transicoes permitidas", "risco": "R-EX-003" }
+  ],
+  "riscos": [
+    { "id": "R-EX-001", "descricao": "Aceitar quantidade invalida gera pedido incorreto", "probabilidade": 3, "impacto": 3, "nivel": "medio" },
+    { "id": "R-EX-002", "descricao": "Desconto calculado errado causa perda financeira", "probabilidade": 3, "impacto": 5, "nivel": "alto" },
+    { "id": "R-EX-003", "descricao": "Transicao indevida (ex.: enviar sem pagar) causa fraude/prejuizo", "probabilidade": 2, "impacto": 5, "nivel": "alto" }
+  ],
+  "itensDeCobertura": [
+    { "id": "EX-EP-V", "requisito": "REQ-EX-001", "tecnica": "EP", "descricao": "particao valida: inteiro em 1..10" },
+    { "id": "EX-EP-I1", "requisito": "REQ-EX-001", "tecnica": "EP", "descricao": "particao invalida: menor que 1" },
+    { "id": "EX-EP-I2", "requisito": "REQ-EX-001", "tecnica": "EP", "descricao": "particao invalida: maior que 10" },
+    { "id": "EX-EP-I3", "requisito": "REQ-EX-001", "tecnica": "EP", "descricao": "particao invalida: nao inteiro" },
+    { "id": "EX-BV-0", "requisito": "REQ-EX-001", "tecnica": "BVA3", "descricao": "limite 0 (abaixo do minimo)" },
+    { "id": "EX-BV-1", "requisito": "REQ-EX-001", "tecnica": "BVA3", "descricao": "limite 1 (minimo)" },
+    { "id": "EX-BV-2", "requisito": "REQ-EX-001", "tecnica": "BVA3", "descricao": "limite 2 (acima do minimo)" },
+    { "id": "EX-BV-9", "requisito": "REQ-EX-001", "tecnica": "BVA3", "descricao": "limite 9 (abaixo do maximo)" },
+    { "id": "EX-BV-10", "requisito": "REQ-EX-001", "tecnica": "BVA3", "descricao": "limite 10 (maximo)" },
+    { "id": "EX-BV-11", "requisito": "REQ-EX-001", "tecnica": "BVA3", "descricao": "limite 11 (acima do maximo)" },
+    { "id": "EX-DT-R1", "requisito": "REQ-EX-002", "tecnica": "DT", "descricao": "regra 1: volume<6, sem fidelidade, sem cupom = 0%" },
+    { "id": "EX-DT-R2", "requisito": "REQ-EX-002", "tecnica": "DT", "descricao": "regra 2: volume>=6 apenas = 10%" },
+    { "id": "EX-DT-R3", "requisito": "REQ-EX-002", "tecnica": "DT", "descricao": "regra 3: fidelidade apenas = 5%" },
+    { "id": "EX-DT-R4", "requisito": "REQ-EX-002", "tecnica": "DT", "descricao": "regra 4: cupom apenas = 5%" },
+    { "id": "EX-DT-R5", "requisito": "REQ-EX-002", "tecnica": "DT", "descricao": "regra 5: volume + fidelidade + cupom = 15% (teto)" },
+    { "id": "EX-ST-T1", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao valida CRIADO -pagar-> PAGO" },
+    { "id": "EX-ST-T2", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao valida PAGO -enviar-> ENVIADO" },
+    { "id": "EX-ST-T3", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao valida ENVIADO -entregar-> ENTREGUE" },
+    { "id": "EX-ST-T4", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao valida CRIADO -cancelar-> CANCELADO" },
+    { "id": "EX-ST-T5", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao valida PAGO -cancelar-> CANCELADO" },
+    { "id": "EX-ST-X1", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao invalida CRIADO -enviar-> rejeitada" },
+    { "id": "EX-ST-X2", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao invalida ENVIADO -cancelar-> rejeitada" },
+    { "id": "EX-ST-X3", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao invalida ENTREGUE -pagar-> rejeitada" },
+    { "id": "EX-ST-X4", "requisito": "REQ-EX-003", "tecnica": "ST", "descricao": "transicao invalida CANCELADO -pagar-> rejeitada" }
+  ]
+}

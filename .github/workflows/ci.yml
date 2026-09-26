@@ -1,0 +1,84 @@
+name: qualidade
+on:
+  pull_request:
+  push: { branches: [main] }
+  schedule: [{ cron: '0 6 * * 1-5' }]   # sensores de drift, fora do ciclo da mudanca
+
+env:
+  CI: 'true'
+  BASE_URL: ${{ secrets.BASE_URL }}
+  API_URL: ${{ secrets.API_URL }}
+
+jobs:
+  estagio-1-estatico:            # segundos; bloqueia tudo
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm run sensores:estaticos
+
+  estagio-2-componente:          # rapido; criterio de saida de componente
+    needs: estagio-1-estatico
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run cobertura
+      - run: npm run sensores:relatorio
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: relatorios-componente, path: reports/ }
+
+  estagio-3-mutacao:             # caro; so em PR
+    if: github.event_name == 'pull_request'
+    needs: estagio-2-componente
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npm run mutacao
+
+  estagio-4-contrato-integracao: # depende de ambiente
+    if: github.event_name != 'schedule'
+    needs: estagio-2-componente
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright test --project=contrato --project=integracao --pass-with-no-tests
+      - run: npm run sensores:relatorio
+
+  estagio-5-e2e-a11y:            # mais caro; so em main e regressao selecionada por risco
+    if: github.ref == 'refs/heads/main'
+    needs: estagio-4-contrato-integracao
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx playwright test --project=e2e --project=acessibilidade --pass-with-no-tests --grep "@risco:R-.*"
+      - run: npm run sensores:relatorio
+
+  drift-continuo:                # agendado
+    if: github.event_name == 'schedule'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm }
+      - run: npm ci
+      - uses: actions/cache@v4
+        with: { path: reports/historico.jsonl, key: historico-${{ github.run_id }}, restore-keys: historico- }
+      - run: npm run sensores:drift

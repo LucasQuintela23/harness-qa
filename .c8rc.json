@@ -1,0 +1,10 @@
+{
+  "all": false,
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/*.spec.ts"],
+  "reporter": ["text-summary", "json-summary"],
+  "reports-dir": "coverage",
+  "check-coverage": true,
+  "statements": 100,
+  "branches": 100
+}

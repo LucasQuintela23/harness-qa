@@ -1,0 +1,39 @@
+{
+  "$schema": "https://raw.githubusercontent.com/stryker-mutator/stryker/master/packages/core/schema/stryker-core.json",
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "npx playwright test --project=componente --reporter=dot"
+  },
+  "mutate": [
+    "src/**/*.ts"
+  ],
+  "checkers": [
+    "typescript"
+  ],
+  "tsconfigFile": "tsconfig.json",
+  "coverageAnalysis": "off",
+  "reporters": [
+    "clear-text",
+    "json"
+  ],
+  "jsonReporter": {
+    "fileName": "reports/mutation.json"
+  },
+  "thresholds": {
+    "high": 90,
+    "low": 80,
+    "break": 75
+  },
+  "timeoutMS": 30000,
+  "ignorePatterns": [
+    ".claude",
+    ".git",
+    "docs",
+    "reports",
+    "coverage",
+    "node_modules/.cache",
+    "harness/guias",
+    "test-results"
+  ],
+  "concurrency": 2
+}
