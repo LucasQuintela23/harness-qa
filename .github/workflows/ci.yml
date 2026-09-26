@@ -7,7 +7,7 @@ on:
 env:
   CI: 'true'
   BASE_URL: ${{ secrets.BASE_URL }}
-  API_URL: ${{ secrets.API_URL }}
+  API_URL: http://localhost:3000
 
 jobs:
   estagio-1-estatico:            # segundos; bloqueia tudo
@@ -55,6 +55,9 @@ jobs:
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
+      - run: |
+          npm run servidor:local > servidor.log 2>&1 &
+          npx --yes wait-on http://localhost:3000/produtos --timeout 60000
       - run: npx playwright test --project=contrato --project=integracao --pass-with-no-tests
       - run: npm run sensores:relatorio
 

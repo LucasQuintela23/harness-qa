@@ -2,7 +2,7 @@
 
 Harness de qualidade para automação de testes com **Playwright + TypeScript**. Ele combina o modelo de *Harness Engineering* (guias que orientam antes, sensores que medem depois) com as técnicas e o vocabulário do syllabus **ISTQB CTFL v4.0**.
 
-Ainda não há sistema sob teste. `src/exemplo`, `tests/componente/exemplo` e `docs/rastreabilidade/exemplo.json` formam um exemplo fictício e descartável: apague-os ao ligar o SUT real.
+O primeiro sistema sob teste é a API [ServeRest](https://serverest.dev) (`tests/integracao/serverest`, `tests/contrato/serverest`; plano em `docs/planos/plano-serverest.md`). `src/exemplo`, `tests/componente/exemplo` e `docs/rastreabilidade/exemplo.json` são um exemplo fictício e descartável de componente.
 
 ## Ideia central
 
@@ -86,6 +86,18 @@ Técnicas aceitas (códigos em `harness/config/politica.json`): `EP`, `BVA2`, `B
 | Pré-push | cobertura de comandos e ramos (critério de saída de componente, não meta) e sensores de relatório |
 | CI (por custo) | estático, componente, mutation (só em PR), contrato e integração, E2E e acessibilidade (só em main, regressão selecionada por risco) |
 | Agendado | `drift`, fora do ciclo da mudança |
+
+## Testes da API ServeRest
+
+O ambiente público https://serverest.dev proíbe carga e responde 429 quando a suíte roda em paralelo. Por isso os testes rodam contra uma instância local (`serverest` é devDependency):
+
+```bash
+cp .env.example .env               # API_URL=http://localhost:3000
+npm run servidor:local             # em outro terminal
+npm run test:integracao && npm run test:contrato
+```
+
+Para checar o ambiente público, aponte `API_URL=https://serverest.dev` e rode com `--workers=1`, com moderação.
 
 ## Como usar
 
