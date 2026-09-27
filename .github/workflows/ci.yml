@@ -80,5 +80,5 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - uses: actions/cache@v4
-        with: { path: reports/history.jsonl, key: history-${{ github.run_id }}, restore-keys: history- }
+        with: { path: reports/history.jsonl, key: "history-${{ github.run_id }}", restore-keys: "history-" }
       - run: npm run sensors:drift
