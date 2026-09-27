@@ -1,0 +1,15 @@
+{
+  "allowedTechniques": ["EP", "BVA2", "BVA3", "DT", "ST", "STMT", "BRANCH", "EG", "CHK", "ATDD", "EXPL"],
+  "levels": ["component", "component-integration", "system", "system-integration", "acceptance"],
+  "directoryForLevel": {
+    "tests/component": "component",
+    "tests/contract": "component-integration",
+    "tests/integration": "component-integration",
+    "tests/e2e": "system",
+    "tests/accessibility": "system"
+  },
+  "timeBudgetSeconds": { "component": 30, "contract": 60, "integration": 180, "e2e": 600, "accessibility": 300 },
+  "maxTestsPerFile": 40,
+  "traceability": { "dir": "docs/traceability" },
+  "drift": { "daysWithoutRunForDeadTest": 30, "maxFlakinessPercentage": 2, "minRiskCoveragePerLevel": { "critical": 100, "high": 100, "medium": 60, "low": 0 } }
+}

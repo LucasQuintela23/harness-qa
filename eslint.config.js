@@ -38,7 +38,7 @@ export default tseslint.config(
     files: ['tests/**/*.spec.ts'],
     rules: {
       'no-restricted-imports': ['error', {
-        patterns: [{ group: ['**/page-objects/*Impl*', '**/clients/*Http*'], message: 'Testes dependem de contratos em support/contratos, nao de implementacoes. Injete via fixture.' }],
+        patterns: [{ group: ['**/page-objects/*Impl*', '**/clients/*Http*'], message: 'Tests depend on contracts in support/contracts, not implementations. Inject via a fixture.' }],
       }],
     },
   },

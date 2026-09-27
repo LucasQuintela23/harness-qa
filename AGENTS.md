@@ -1,53 +1,53 @@
-# AGENTS.md — convenções do harness de qualidade
+# AGENTS.md — quality harness conventions
 
-Este repositório é um harness de testes (Playwright + TypeScript). O agente escreve e revisa testes; o harness guia antes (feedforward) e mede depois (feedback). Leia isto antes de qualquer alteração.
+This repository is a test harness (Playwright + TypeScript). The agent writes and reviews tests; the harness guides beforehand (feedforward) and measures afterward (feedback). Read this before making any change.
 
-## Fluxo obrigatório para um teste novo
-1. Requisito e risco existem em `docs/rastreabilidade/*.json`? Se não, cadastre (risco: `docs/analise-de-risco.md`).
-2. Rode a skill `/derivar-casos-de-teste`: ela devolve a tabela de partições/limites/decisão/estados **antes** do código e os itens de cobertura.
-3. Registre os itens em `itensDeCobertura`. Gere o esqueleto: `npm run novo-teste -- <nivel> <nome> <TECNICA> <REQ> <RISCO> <ITEM>`.
-4. Implemente. Valide: `npm run verificar`. Corrija seguindo o campo COMO CORRIGIR das mensagens dos sensores.
-5. Commit no padrão abaixo. Antes do PR: `/revisar-teste`.
+## Required flow for a new test
+1. Do the requirement and risk exist in `docs/traceability/*.json`? If not, register them (risk: `docs/risk-analysis.md`).
+2. Run the `/derive-test-cases` skill: it returns the partition/boundary/decision/state table **before** the code, along with the coverage items.
+3. Register the items under `coverageItems`. Generate the skeleton: `npm run new-test -- <level> <name> <TECHNIQUE> <REQ> <RISK> <ITEM>`.
+4. Implement it. Validate: `npm run verify`. Fix issues following the HOW TO FIX field of the sensor messages.
+5. Commit using the pattern below. Before the PR: `/review-test`.
 
-## Metadado obrigatório (sensor `rastreabilidade`)
+## Required metadata (`traceability` sensor)
 ```ts
-test('rejeita 11 (acima do limite superior)', {
-  tag: ['@tecnica:BVA3', '@req:REQ-EX-001', '@risco:R-EX-001', '@cobertura:EX-BV-11'],
+test('rejects 11 (above the upper boundary)', {
+  tag: ['@technique:BVA3', '@req:REQ-EX-001', '@risk:R-EX-001', '@coverage:EX-BV-11'],
 }, () => { ... });
 ```
-Uma `@tecnica`, ao menos um `@req`, `@risco` e `@cobertura`. Todo item de cobertura do plano precisa de teste (ou `"manual": true` justificado).
+One `@technique`, at least one `@req`, `@risk`, and `@coverage`. Every coverage item in the plan needs a test (or a justified `"manual": true`).
 
-## Catálogo de técnicas (CTFL v4.0) e códigos
-| Código | Técnica | Item de cobertura |
+## Technique catalog (CTFL v4.0) and codes
+| Code | Technique | Coverage item |
 |---|---|---|
-| EP | Particionamento de equivalência | cada partição válida e inválida |
-| BVA2 / BVA3 | Valor limite 2 ou 3 valores (declare a variante no plano) | cada valor de limite |
-| DT | Tabela de decisão | cada coluna (regra) |
-| ST | Transição de estado | todos os estados, transições válidas, tentativas inválidas |
-| STMT / BRANCH | Comandos / ramos (caixa-branca, nível componente) | comandos / ramos executados |
-| EG | Error guessing (catálogo em `docs/estrategia-de-testes.md`) | defeito do catálogo |
-| CHK | Baseado em checklist | item do checklist |
-| ATDD | Critério de aceite Gherkin (rastrear até a técnica caixa-preta de origem) | critério de aceite |
-| EXPL | Exploratório com charter (`docs/charters`) | charter executado |
-Técnica fora do syllabus só entra em `harness/config/politica.json` marcada como **extensão**.
+| EP | Equivalence partitioning | each valid and invalid partition |
+| BVA2 / BVA3 | Boundary value analysis, 2 or 3 values (declare the variant in the plan) | each boundary value |
+| DT | Decision table | each column (rule) |
+| ST | State transition | all states, valid transitions, invalid attempts |
+| STMT / BRANCH | Statement / branch coverage (white-box, component level) | statements / branches executed |
+| EG | Error guessing (catalog in `docs/test-strategy.md`) | defect from the catalog |
+| CHK | Checklist-based | checklist item |
+| ATDD | Gherkin acceptance criterion (traced back to the originating black-box technique) | acceptance criterion |
+| EXPL | Exploratory with a charter (`docs/charters`) | charter executed |
+A technique outside the syllabus only enters `harness/config/policy.json` marked as an **extension**.
 
-## Regras de código
-- SRP: um teste, um comportamento, no máximo 3 `expect`. Page object sem asserção. Builder não conhece transporte.
-- OCP: novo cenário = nova linha de dados, não edição de helper.
-- LSP/ISP: contratos pequenos em `support/contratos` (≤ 7 membros, sem implementação); sem `BasePage` gigante.
-- DIP: teste depende de contrato injetado por fixture; nunca de driver, URL ou credencial (`process.env` só em `support/ambiente`).
-- Sem `waitForTimeout`/sleep, sem `if`/laço no corpo do teste, sem estado mutável de módulo, sem dependência entre specs, sem `test.only`/`skip` sem defeito registrado.
-- Dados isolados e determinísticos; segredos só por variável de ambiente (`.env` local ignorado).
-- Alocação por camada: pergunte "o componente resolve?" antes de escrever E2E (pirâmide/quadrantes em `docs/estrategia-de-testes.md`).
+## Code rules
+- SRP: one test, one behavior, at most 3 `expect` calls. Page objects hold no assertions. Builders know nothing about transport.
+- OCP: a new scenario means a new data row, not editing a helper.
+- LSP/ISP: small contracts in `support/contracts` (≤ 7 members, no implementation); no giant `BasePage`.
+- DIP: a test depends on a contract injected via a fixture; never on a concrete driver, URL, or credential (`process.env` only in `support/environment`).
+- No `waitForTimeout`/sleep, no `if`/loop inside a test body, no mutable module-level state, no dependency between specs, no `test.only`/`skip` without a registered defect.
+- Isolated and deterministic data; secrets only via environment variables (a local `.env` is git-ignored).
+- Layer allocation: ask "would the component level catch this?" before writing an E2E test (pyramid/quadrants in `docs/test-strategy.md`).
 
-## Comandos
-`npm run verificar` (rápido) · `npm run cobertura` (comandos/ramos: critério de saída de componente, não meta) · `npm run mutacao` · `npm run matriz` · `npm run sensores:{estaticos,relatorio,drift}`.
+## Commands
+`npm run verify` (fast) · `npm run coverage` (statements/branches: component exit criterion, not a target) · `npm run mutation` · `npm run matrix` · `npm run sensors:{static,report,drift}`.
 
-## Commits (Conventional Commits, sem emoji)
-`<tipo>: <descrição, máx. 4 palavras>`. Tipos: feat, fix, docs, test, build, perf, style, refactor, chore, ci, raw, cleanup, remove. Ex.: `test: Cenários de login`. O hook `commit-msg` bloqueia mensagens com emoji ou `:código:` e qualquer formato fora disso. Sem linha `Co-Authored-By`. Commit e push só quando o usuário pedir.
+## Commits (Conventional Commits, no emoji)
+`<type>: <description, max. 4 words>`. Types: feat, fix, docs, test, build, perf, style, refactor, chore, ci, raw, cleanup, remove. E.g.: `test: Login scenarios`. The `commit-msg` hook blocks messages with emoji or `:code:` and anything outside this format. No `Co-Authored-By` line. Commit and push only when the user asks.
 
-## Skills (`harness/guias/skills`, também em `.claude/skills`)
-`/derivar-casos-de-teste` · `/revisar-teste` · `/revisar-plano-de-teste` · `/auditar-cobertura-de-risco` · `/conduzir-sessao-exploratoria`.
+## Skills (`harness/guides/skills`, also under `.claude/skills`)
+`/derive-test-cases` · `/review-test` · `/review-test-plan` · `/audit-risk-coverage` · `/run-exploratory-session`.
 
-## Dados de exemplo
-`src/exemplo`, `tests/componente/exemplo` e `docs/rastreabilidade/exemplo.json` são um exemplo descartável e fictício. Apague ao ligar o SUT real.
+## Example data
+`src/example`, `tests/component/example`, and `docs/traceability/example.json` are a disposable, fictional example. Delete them once the real SUT is wired up.

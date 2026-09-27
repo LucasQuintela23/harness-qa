@@ -1,3 +1,3 @@
 #!/bin/sh
-# Custo medio: componente + cobertura de comandos/ramos (criterio de saida) + sensores de relatorio.
-npm run -s cobertura && npm run -s sensores:relatorio
+# Medium cost: component + statement/branch coverage (exit criterion) + report sensors.
+npm run -s coverage && npm run -s sensors:report
