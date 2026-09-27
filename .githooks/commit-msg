@@ -1,2 +1,2 @@
 #!/bin/sh
-exec npx --no-install tsx harness/sensores/mensagem-de-commit.ts "$1"
+exec npx --no-install tsx harness/sensors/commit-message.ts "$1"

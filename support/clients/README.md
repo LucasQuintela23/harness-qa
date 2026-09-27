@@ -1,1 +1,1 @@
-Clients de API: implementam contratos de support/contratos (nomeados *Http*.ts). Builders nunca importam clients (sensor E2).
+API clients: implement contracts from support/contracts (named *Http*.ts). Builders never import clients (sensor E2).

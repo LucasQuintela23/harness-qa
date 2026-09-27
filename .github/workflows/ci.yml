@@ -1,8 +1,8 @@
-name: qualidade
+name: quality
 on:
   pull_request:
   push: { branches: [main] }
-  schedule: [{ cron: '0 6 * * 1-5' }]   # sensores de drift, fora do ciclo da mudanca
+  schedule: [{ cron: '0 6 * * 1-5' }]   # drift sensors, outside the change cycle
 
 env:
   CI: 'true'
@@ -10,7 +10,7 @@ env:
   API_URL: ${{ secrets.API_URL }}
 
 jobs:
-  estagio-1-estatico:            # segundos; bloqueia tudo
+  stage-1-static:                # seconds; blocks everything
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,48 +19,48 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run lint
-      - run: npm run sensores:estaticos
+      - run: npm run sensors:static
 
-  estagio-2-componente:          # rapido; criterio de saida de componente
-    needs: estagio-1-estatico
+  stage-2-component:             # fast; component exit criterion
+    needs: stage-1-static
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npm run cobertura
-      - run: npm run sensores:relatorio
+      - run: npm run coverage
+      - run: npm run sensors:report
       - uses: actions/upload-artifact@v4
         if: always()
-        with: { name: relatorios-componente, path: reports/ }
+        with: { name: component-reports, path: reports/ }
 
-  estagio-3-mutacao:             # caro; so em PR
+  stage-3-mutation:              # expensive; PR only
     if: github.event_name == 'pull_request'
-    needs: estagio-2-componente
+    needs: stage-2-component
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npm run mutacao
+      - run: npm run mutation
 
-  estagio-4-contrato-integracao: # depende de ambiente
+  stage-4-contract-integration:  # depends on an environment
     if: github.event_name != 'schedule'
-    needs: estagio-2-componente
+    needs: stage-2-component
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
       - run: npm ci
-      - run: npx playwright test --project=contrato --project=integracao --pass-with-no-tests
-      - run: npm run sensores:relatorio
+      - run: npx playwright test --project=contract --project=integration --pass-with-no-tests
+      - run: npm run sensors:report
 
-  estagio-5-e2e-a11y:            # mais caro; so em main e regressao selecionada por risco
+  stage-5-e2e-a11y:              # most expensive; main only, regression selected by risk
     if: github.ref == 'refs/heads/main'
-    needs: estagio-4-contrato-integracao
+    needs: stage-4-contract-integration
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -68,10 +68,10 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - run: npx playwright test --project=e2e --project=acessibilidade --pass-with-no-tests --grep "@risco:R-.*"
-      - run: npm run sensores:relatorio
+      - run: npx playwright test --project=e2e --project=accessibility --pass-with-no-tests --grep "@risk:R-.*"
+      - run: npm run sensors:report
 
-  drift-continuo:                # agendado
+  continuous-drift:               # scheduled
     if: github.event_name == 'schedule'
     runs-on: ubuntu-latest
     steps:
@@ -80,5 +80,5 @@ jobs:
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - uses: actions/cache@v4
-        with: { path: reports/historico.jsonl, key: historico-${{ github.run_id }}, restore-keys: historico- }
-      - run: npm run sensores:drift
+        with: { path: reports/history.jsonl, key: history-${{ github.run_id }}, restore-keys: history- }
+      - run: npm run sensors:drift

@@ -1,0 +1,38 @@
+{
+  "requirements": [
+    { "id": "REQ-EX-001", "title": "Item quantity must be an integer from 1 to 10", "risk": "R-EX-001" },
+    { "id": "REQ-EX-002", "title": "Discount by volume, loyalty, and coupon, capped at 15%", "risk": "R-EX-002" },
+    { "id": "REQ-EX-003", "title": "Order lifecycle respects allowed transitions", "risk": "R-EX-003" }
+  ],
+  "risks": [
+    { "id": "R-EX-001", "description": "Accepting an invalid quantity produces an incorrect order", "probability": 3, "impact": 3, "level": "medium" },
+    { "id": "R-EX-002", "description": "A miscalculated discount causes financial loss", "probability": 3, "impact": 5, "level": "high" },
+    { "id": "R-EX-003", "description": "An improper transition (e.g. shipping without payment) causes fraud/loss", "probability": 2, "impact": 5, "level": "high" }
+  ],
+  "coverageItems": [
+    { "id": "EX-EP-V", "requirement": "REQ-EX-001", "technique": "EP", "description": "valid partition: integer in 1..10" },
+    { "id": "EX-EP-I1", "requirement": "REQ-EX-001", "technique": "EP", "description": "invalid partition: less than 1" },
+    { "id": "EX-EP-I2", "requirement": "REQ-EX-001", "technique": "EP", "description": "invalid partition: greater than 10" },
+    { "id": "EX-EP-I3", "requirement": "REQ-EX-001", "technique": "EP", "description": "invalid partition: not an integer" },
+    { "id": "EX-BV-0", "requirement": "REQ-EX-001", "technique": "BVA3", "description": "boundary 0 (below the minimum)" },
+    { "id": "EX-BV-1", "requirement": "REQ-EX-001", "technique": "BVA3", "description": "boundary 1 (minimum)" },
+    { "id": "EX-BV-2", "requirement": "REQ-EX-001", "technique": "BVA3", "description": "boundary 2 (above the minimum)" },
+    { "id": "EX-BV-9", "requirement": "REQ-EX-001", "technique": "BVA3", "description": "boundary 9 (below the maximum)" },
+    { "id": "EX-BV-10", "requirement": "REQ-EX-001", "technique": "BVA3", "description": "boundary 10 (maximum)" },
+    { "id": "EX-BV-11", "requirement": "REQ-EX-001", "technique": "BVA3", "description": "boundary 11 (above the maximum)" },
+    { "id": "EX-DT-R1", "requirement": "REQ-EX-002", "technique": "DT", "description": "rule 1: volume<6, no loyalty, no coupon = 0%" },
+    { "id": "EX-DT-R2", "requirement": "REQ-EX-002", "technique": "DT", "description": "rule 2: volume>=6 only = 10%" },
+    { "id": "EX-DT-R3", "requirement": "REQ-EX-002", "technique": "DT", "description": "rule 3: loyalty only = 5%" },
+    { "id": "EX-DT-R4", "requirement": "REQ-EX-002", "technique": "DT", "description": "rule 4: coupon only = 5%" },
+    { "id": "EX-DT-R5", "requirement": "REQ-EX-002", "technique": "DT", "description": "rule 5: volume + loyalty + coupon = 15% (ceiling)" },
+    { "id": "EX-ST-T1", "requirement": "REQ-EX-003", "technique": "ST", "description": "valid transition CREATED -pay-> PAID" },
+    { "id": "EX-ST-T2", "requirement": "REQ-EX-003", "technique": "ST", "description": "valid transition PAID -ship-> SHIPPED" },
+    { "id": "EX-ST-T3", "requirement": "REQ-EX-003", "technique": "ST", "description": "valid transition SHIPPED -deliver-> DELIVERED" },
+    { "id": "EX-ST-T4", "requirement": "REQ-EX-003", "technique": "ST", "description": "valid transition CREATED -cancel-> CANCELED" },
+    { "id": "EX-ST-T5", "requirement": "REQ-EX-003", "technique": "ST", "description": "valid transition PAID -cancel-> CANCELED" },
+    { "id": "EX-ST-X1", "requirement": "REQ-EX-003", "technique": "ST", "description": "invalid transition CREATED -ship-> rejected" },
+    { "id": "EX-ST-X2", "requirement": "REQ-EX-003", "technique": "ST", "description": "invalid transition SHIPPED -cancel-> rejected" },
+    { "id": "EX-ST-X3", "requirement": "REQ-EX-003", "technique": "ST", "description": "invalid transition DELIVERED -pay-> rejected" },
+    { "id": "EX-ST-X4", "requirement": "REQ-EX-003", "technique": "ST", "description": "invalid transition CANCELED -pay-> rejected" }
+  ]
+}
